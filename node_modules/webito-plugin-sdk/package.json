@@ -1,0 +1,20 @@
+{
+    "name": "webito-plugin-sdk",
+    "version": "1.0.0",
+    "description": "SDK for creating plugins on webito",
+    "main": "dist/index.js",
+    "types": "dist/index.d.ts",
+    "scripts": {
+        "build": "tsc"
+    },
+    "keywords": [
+        "plugin",
+        "webito",
+        "sdk"
+    ],
+    "author": "Webito",
+    "license": "MIT",
+    "devDependencies": {
+        "typescript": "^4.0.0"
+    }
+}
