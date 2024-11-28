@@ -6,27 +6,32 @@ import webito from 'webito-plugin-sdk'
 
 const starter = new webito.WebitoPlugin('starter');
 
-starter.registerHook('messagesCreate', ({ target }: { target: { mobile: number } }) => {
-    return axios.post('https://example.com/sendotp', { mobile: target.mobile })
-        .then(response => {
-            console.log('OTP sent:', response.data);
-        })
-        .catch(error => {
-            console.error('Error sending OTP:', error);
-        });
+starter.registerHook('messagesCreate', async ({ vars, data }: any) => {
+    const send = await axios.post('https://api.limosms.com/api/sendsms', {
+        "Message": data.message,
+        "SenderNumber": vars.sender,
+        "MobileNumber": [data.phone]
+    }, {
+        headers: {
+            ApiKey: vars.apitoken
+        }
+    });
+    return { status: (send.status == 200) }
 });
 
-starter.registerHook('productsCreate', (data) => {
+starter.registerHook('productsCreate', async (data) => {
     console.log('Product created:', data);
-
-    return starter.executeHook('messagesCreate', { target: { mobile: data.mobile } });
+    return { status: true }
 });
 
-const runPlugin = (inputData: { hook: string; data: any }) => {
-    return starter.executeHook(inputData.hook, inputData.data);
+const runPlugin = async (inputData: { hook: string; data: any }) => {
+    const result = await starter.executeHook(inputData.hook, inputData.data);
+    return result;
 };
 
 
-process.on('message', async (msg: any) => {
-    return await runPlugin(msg);
+process.stdin.on('data', async (input) => {
+    const msg = JSON.parse(input.toString());
+    const result: any = await runPlugin(msg);
+    starter.response({ status: result.status, data: result.data })
 });
